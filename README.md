@@ -1,1 +1,1 @@
-![Логотип](Assets/#Project/Art/Sprites/logo.png)
+![Логотип](Assets/%23Project/Art/Sprites/logo.png)
