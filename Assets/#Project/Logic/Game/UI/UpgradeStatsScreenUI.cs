@@ -1,10 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Lean.Gui;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class UpgradeStatsScreenUI : MonoBehaviour
     {
@@ -19,14 +20,14 @@ namespace JustMoby_TestWork
         private string _upgradeCountTemplate;
         private PrefabsLibrary _prefabs;
         private StatsUpgradeService _statsUpgradeService;
-        private SignalBus _signalBus;
+        private IMessageBroker _messageBroker;
 
         [Inject]
-        private void Construct(PrefabsLibrary prefabs, StatsUpgradeService statsUpgradeService, SignalBus signalBus)
+        private void Construct(PrefabsLibrary prefabs, StatsUpgradeService statsUpgradeService, IMessageBroker messageBroker)
         {
             _prefabs = prefabs;
             _statsUpgradeService = statsUpgradeService;
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
         }
 
         private void Awake()
@@ -37,23 +38,31 @@ namespace JustMoby_TestWork
             ApplyUpgradesButton?.OnClick.AddListener(_statsUpgradeService.ApplyUpgrade);
             CancelUpgradeButton?.OnClick.AddListener(_statsUpgradeService.CancelUpgrade);
 
-            _signalBus.Subscribe<StatUpgradeCreatedSignal>(OnStatUpgradeCreated);
-            _signalBus.Subscribe<StatUpgradeValueSignal>(OnStatUpgradeValue);
-            _signalBus.Subscribe<UpgradeAppliedSignal>(Hide);
-            _signalBus.Subscribe<UpgradeCanceledSignal>(Hide);
-            _signalBus.Subscribe<StatsUpgradesCountSignal>(OnStatsUpgradesCountChanged);
+            _messageBroker.Receive<StatUpgradeCreatedMessage>()
+                .Subscribe(OnStatUpgradeCreated)
+                .AddTo(this);
+
+            _messageBroker.Receive<StatUpgradeValueMessage>()
+                .Subscribe(OnStatUpgradeValue)
+                .AddTo(this);
+
+            _messageBroker.Receive<UpgradeAppliedMessage>()
+                .Subscribe(_ => Hide())
+                .AddTo(this);
+
+            _messageBroker.Receive<UpgradeCanceledMessage>()
+                .Subscribe(_ => Hide())
+                .AddTo(this);
+
+            _statsUpgradeService.CurrentAvailableUpgradeCountObservable
+                .Subscribe(SetUpgradesCount)
+                .AddTo(this);
         }
 
         private void OnDestroy()
         {
             ApplyUpgradesButton?.OnClick.RemoveListener(_statsUpgradeService.ApplyUpgrade);
             CancelUpgradeButton?.OnClick.RemoveListener(_statsUpgradeService.CancelUpgrade);
-
-            _signalBus.Unsubscribe<StatUpgradeCreatedSignal>(OnStatUpgradeCreated);
-            _signalBus.Unsubscribe<StatUpgradeValueSignal>(OnStatUpgradeValue);
-            _signalBus.Unsubscribe<UpgradeAppliedSignal>(Hide);
-            _signalBus.Unsubscribe<UpgradeCanceledSignal>(Hide);
-            _signalBus.Unsubscribe<StatsUpgradesCountSignal>(OnStatsUpgradesCountChanged);
         }
 
         public void Show()
@@ -75,19 +84,14 @@ namespace JustMoby_TestWork
             UpdateInteractables();
         }
 
-        private void OnStatsUpgradesCountChanged(StatsUpgradesCountSignal signal)
+        private void OnStatUpgradeCreated(StatUpgradeCreatedMessage message)
         {
-            SetUpgradesCount(signal.Count);
+            CreateStatUpgradeUI(message.Stat);
         }
 
-        private void OnStatUpgradeCreated(StatUpgradeCreatedSignal signal)
+        private void OnStatUpgradeValue(StatUpgradeValueMessage message)
         {
-            CreateStatUpgradeUI(signal.Stat);
-        }
-
-        private void OnStatUpgradeValue(StatUpgradeValueSignal signal)
-        {
-            SetStatValue(signal.Stat, signal.Value);
+            SetStatValue(message.Stat, message.Value);
         }
 
         private void CreateStatUpgradeUI(Stat stat)

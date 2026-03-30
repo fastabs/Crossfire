@@ -1,7 +1,8 @@
+﻿using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class Projectile : MonoBehaviour
     {
@@ -17,27 +18,23 @@ namespace JustMoby_TestWork
 
         private IProjectileLifeController _projectileLifeController;
         private PauseService _pauseService;
-        private SignalBus _signalBus;
 
         [Inject]
-        private void Construct(IProjectileLifeController projectileLifeController,
-            PauseService pauseService, SignalBus signalBus)
+        private void Construct(IProjectileLifeController projectileLifeController, PauseService pauseService)
         {
             _projectileLifeController = projectileLifeController;
             _pauseService = pauseService;
-            _signalBus = signalBus;
-
-            _signalBus.Subscribe<PauseToggledSignal>(OnPauseToggled);
         }
+
         private void Awake()
         {
-            // препятствие все что не враг
-            _obstacleLayer = LayerMask.NameToLayer("Default");
-        }
+            _obstacleLayer = LayerMask.NameToLayer("Obstacle");
+            if (_obstacleLayer == -1)
+                _obstacleLayer = LayerMask.NameToLayer("Default");
 
-        private void OnDestroy()
-        {
-            _signalBus?.Unsubscribe<PauseToggledSignal>(OnPauseToggled);
+            _pauseService.State
+                .Subscribe(OnPauseStateChanged)
+                .AddTo(this);
         }
 
         public void Launch(LaunchParameters parameters)
@@ -53,9 +50,9 @@ namespace JustMoby_TestWork
             _projectileLifeController.StartTimer();
         }
 
-        private void OnPauseToggled(PauseToggledSignal _)
+        private void OnPauseStateChanged(bool isPaused)
         {
-            if (_pauseService.IsPaused)
+            if (isPaused)
             {
                 _savedVelocity = Rigidbody.velocity;
                 _savedAngularVelocity = Rigidbody.angularVelocity;

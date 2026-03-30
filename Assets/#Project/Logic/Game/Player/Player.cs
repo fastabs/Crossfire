@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class Player : MonoBehaviour
     {
@@ -23,3 +23,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

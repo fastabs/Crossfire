@@ -1,23 +1,42 @@
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface ISceneService
     {
-        void LoadMainMenu();
-        void LoadGame();
+        UniTask LoadMainMenuAsync();
+        UniTask LoadGameAsync();
     }
 
     public sealed class SceneService : ISceneService
     {
-        public void LoadMainMenu()
+        private bool _isLoading;
+
+        public UniTask LoadMainMenuAsync()
         {
-            SceneManager.LoadSceneAsync(SceneNames.MainMenu, LoadSceneMode.Single);
+            return LoadSceneAsync(SceneNames.MainMenu);
         }
 
-        public void LoadGame()
+        public UniTask LoadGameAsync()
         {
-            SceneManager.LoadSceneAsync(SceneNames.Game, LoadSceneMode.Single);
+            return LoadSceneAsync(SceneNames.Game);
+        }
+
+        private async UniTask LoadSceneAsync(string sceneName)
+        {
+            if (_isLoading)
+                return;
+
+            _isLoading = true;
+            try
+            {
+                await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
     }
 

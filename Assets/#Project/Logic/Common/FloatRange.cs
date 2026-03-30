@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using Random = UnityEngine.Random;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     [Serializable]
     public struct FloatRange
@@ -15,3 +15,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

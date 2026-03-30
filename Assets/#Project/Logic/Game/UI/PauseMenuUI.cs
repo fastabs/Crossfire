@@ -1,9 +1,11 @@
+﻿using Cysharp.Threading.Tasks;
 using Lean.Gui;
 using Lean.Transition;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class PauseMenuUI : MonoBehaviour
     {
@@ -16,15 +18,13 @@ namespace JustMoby_TestWork
         private ISaveGameService _saveGameService;
         private ISceneService _sceneService;
         private PauseService _pauseService;
-        private SignalBus _signalBus;
 
         [Inject]
         private void Construct(ISaveGameService saveGameService, ISceneService sceneService,
-            SignalBus signalBus, PauseService pauseService)
+            PauseService pauseService)
         {
             _saveGameService = saveGameService;
             _sceneService = sceneService;
-            _signalBus = signalBus;
             _pauseService = pauseService;
         }
 
@@ -34,9 +34,12 @@ namespace JustMoby_TestWork
                 UpgradeStatsButton.OnClick.AddListener(OnUpgradeStatsClicked);
 
             if (ExitToMainMenuButton != null)
-                ExitToMainMenuButton.OnClick.AddListener(OnExitToMainMenu);
+                ExitToMainMenuButton.OnClick.AddListener(OnExitToMainMenuClicked);
 
-            _signalBus?.Subscribe<PauseToggledSignal>(OnPauseToggled);
+            _pauseService.State
+                .Skip(1)
+                .Subscribe(OnPauseStateChanged)
+                .AddTo(this);
         }
 
         private void OnDestroy()
@@ -45,9 +48,7 @@ namespace JustMoby_TestWork
                 UpgradeStatsButton.OnClick.RemoveListener(OnUpgradeStatsClicked);
 
             if (ExitToMainMenuButton != null)
-                ExitToMainMenuButton.OnClick.RemoveListener(OnExitToMainMenu);
-
-            _signalBus?.Unsubscribe<PauseToggledSignal>(OnPauseToggled);
+                ExitToMainMenuButton.OnClick.RemoveListener(OnExitToMainMenuClicked);
         }
 
         public void Show()
@@ -60,9 +61,9 @@ namespace JustMoby_TestWork
             HideTransition?.Begin();
         }
 
-        private void OnPauseToggled(PauseToggledSignal _)
+        private void OnPauseStateChanged(bool isPaused)
         {
-            if (_pauseService.IsPaused)
+            if (isPaused)
                 Show();
             else
                 Hide();
@@ -73,10 +74,18 @@ namespace JustMoby_TestWork
             UpgradeStatsScreenUI?.Show();
         }
 
-        private void OnExitToMainMenu()
+        private void OnExitToMainMenuClicked()
         {
+            ExitToMainMenuAsync().Forget();
+        }
+
+        private async UniTaskVoid ExitToMainMenuAsync()
+        {
+            if (ExitToMainMenuButton != null)
+                ExitToMainMenuButton.interactable = false;
+
             _saveGameService.SaveGame();
-            _sceneService.LoadMainMenu();
+            await _sceneService.LoadMainMenuAsync();
         }
     }
 }

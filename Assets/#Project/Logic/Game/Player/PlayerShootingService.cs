@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface IPlayerShootingService
     {
@@ -50,3 +50,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

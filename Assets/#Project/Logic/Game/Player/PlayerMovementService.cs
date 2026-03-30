@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface IPlayerMovementService
     {
@@ -104,3 +104,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

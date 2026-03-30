@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class CellSliderCell : MonoBehaviour
     {

@@ -1,6 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     [CreateAssetMenu(menuName = "Configs/ConfigsRepository", fileName = nameof(ConfigRepository))]
     public sealed class ConfigRepository : ScriptableObject, IConfigRepository
@@ -10,4 +10,5 @@ namespace JustMoby_TestWork
         [field: SerializeField] public EnemyConfig Enemy { get; private set; }
     }
 }
+
 

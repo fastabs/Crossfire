@@ -1,10 +1,12 @@
+﻿using Cysharp.Threading.Tasks;
 using Lean.Gui;
 using Lean.Transition;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class GameOverUI : MonoBehaviour
     {
@@ -20,14 +22,14 @@ namespace JustMoby_TestWork
         private IGameStatsService _gameStatsService;
         private ISaveEntryRepository _saveEntryRepository;
         private HealthParameter _playerHealthParameter;
-        private SignalBus _signalBus;
+        private IMessageBroker _messageBroker;
 
         [Inject]
-        private void Construct(SignalBus signalBus, ISceneService sceneService,
+        private void Construct(IMessageBroker messageBroker, ISceneService sceneService,
             IGameStatsService gameStatsService, ISaveEntryRepository saveEntryRepository,
             HealthParameter playerHealthParameter)
         {
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
             _sceneService = sceneService;
             _gameStatsService = gameStatsService;
             _saveEntryRepository = saveEntryRepository;
@@ -40,22 +42,22 @@ namespace JustMoby_TestWork
                 _labelTemplate = Label.text;
 
             if (GoToMainMenuButton != null)
-                GoToMainMenuButton.OnClick.AddListener(OnGoToMainMenu);
+                GoToMainMenuButton.OnClick.AddListener(OnGoToMainMenuClicked);
 
-            _signalBus.Subscribe<DeathSignal>(ShowGameOver);
+            _messageBroker.Receive<DeathMessage>()
+                .Subscribe(ShowGameOver)
+                .AddTo(this);
         }
 
         private void OnDestroy()
         {
-            _signalBus.Unsubscribe<DeathSignal>(ShowGameOver);
-
             if (GoToMainMenuButton != null)
-                GoToMainMenuButton.OnClick.RemoveListener(OnGoToMainMenu);
+                GoToMainMenuButton.OnClick.RemoveListener(OnGoToMainMenuClicked);
         }
 
-        private void ShowGameOver(DeathSignal signal)
+        private void ShowGameOver(DeathMessage message)
         {
-            if (signal.Health != _playerHealthParameter)
+            if (message.Health != _playerHealthParameter)
                 return;
 
             if (_isGameOver)
@@ -75,12 +77,17 @@ namespace JustMoby_TestWork
             _saveEntryRepository.DeleteSave();
         }
 
-        private void OnGoToMainMenu()
+        private void OnGoToMainMenuClicked()
+        {
+            GoToMainMenuAsync().Forget();
+        }
+
+        private async UniTaskVoid GoToMainMenuAsync()
         {
             if (GoToMainMenuButton != null)
                 GoToMainMenuButton.interactable = false;
 
-            _sceneService.LoadMainMenu();
+            await _sceneService.LoadMainMenuAsync();
         }
     }
 }

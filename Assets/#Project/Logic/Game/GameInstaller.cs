@@ -1,8 +1,9 @@
-using System;
+﻿using System;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class GameInstaller : MonoInstaller
     {
@@ -22,8 +23,7 @@ namespace JustMoby_TestWork
             if (prefabsLibrary != null)
                 Container.BindInstance(prefabsLibrary).AsSingle();
 
-            BindSignals();
-
+            Container.BindInterfacesAndSelfTo<MessageBroker>().AsSingle();
             Container.BindInterfacesAndSelfTo<PauseService>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameStatsService>().AsSingle();
             Container.BindPlayerCore();
@@ -37,24 +37,6 @@ namespace JustMoby_TestWork
             Container.BindInterfacesAndSelfTo<SaveGameService>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameInitService>().AsSingle();
             Container.BindInterfacesAndSelfTo<LayerCollisionInitService>().AsSingle();
-        }
-
-        private void BindSignals()
-        {
-            SignalBusInstaller.Install(Container);
-
-            Container.DeclareSignal<PauseToggledSignal>();
-            Container.DeclareSignal<StatsUpgradesCountSignal>();
-            Container.DeclareSignal<TakeDamageSignal>();
-            Container.DeclareSignal<TakeHealSignal>();
-            Container.DeclareSignal<ChangeMaxHealthSignal>();
-            Container.DeclareSignal<DeathSignal>();
-            Container.DeclareSignal<HitEnemySignal>();
-            Container.DeclareSignal<UpgradeAppliedSignal>();
-            Container.DeclareSignal<UpgradeCanceledSignal>();
-            Container.DeclareSignal<StatUpgradeValueSignal>();
-            Container.DeclareSignal<StatUpgradeCreatedSignal>();
-            Container.DeclareSignal<FirstUpgradePointReceivedSignal>();
         }
     }
 }

@@ -1,8 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Pool;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface IProjectileFactory
     {
@@ -75,3 +75,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

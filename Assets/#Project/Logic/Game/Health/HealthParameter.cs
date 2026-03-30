@@ -1,19 +1,19 @@
+﻿using UniRx;
 using UnityEngine;
-using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class HealthParameter : IParameter<int>
     {
         public int Value { get; private set; }
 
         private readonly IStatsProvider _statsProvider;
-        private readonly SignalBus _signalBus;
+        private readonly IMessageBroker _messageBroker;
 
-        public HealthParameter(IStatsProvider statsProvider, SignalBus signalBus)
+        public HealthParameter(IStatsProvider statsProvider, IMessageBroker messageBroker)
         {
             _statsProvider = statsProvider;
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
         }
 
         public void TakeDamage(int damage, Vector3 hitPoint)
@@ -24,10 +24,10 @@ namespace JustMoby_TestWork
             if (health <= 0)
             {
                 Value = 0;
-                _signalBus.Fire(new DeathSignal(this));
+                _messageBroker.Publish(new DeathMessage(this));
             }
 
-            _signalBus.Fire(new TakeDamageSignal(hitPoint, this));
+            _messageBroker.Publish(new TakeDamageMessage(hitPoint, this));
         }
 
         public void TakeHeal(int heal)
@@ -39,7 +39,7 @@ namespace JustMoby_TestWork
         {
             var maxHealth = _statsProvider.MaxHealth.Value;
             Value = Mathf.Clamp(health, 0, maxHealth);
-            _signalBus.Fire(new TakeHealSignal(this));
+            _messageBroker.Publish(new TakeHealMessage(this));
         }
     }
 }

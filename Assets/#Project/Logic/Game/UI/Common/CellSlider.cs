@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class CellSlider : MonoBehaviour
     {

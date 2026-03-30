@@ -1,7 +1,8 @@
+﻿using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class PlayerInitService : IInitializable
     {
@@ -11,13 +12,13 @@ namespace JustMoby_TestWork
         private readonly Player _player;
         private readonly ISaveEntryRepository _saveEntryRepository;
         private readonly StatsUpgradeService _statsUpgradeService;
-        private readonly SignalBus _signalBus;
+        private readonly IMessageBroker _messageBroker;
         private readonly IGameStatsService _gameStatsService;
         private readonly IPlayerMovementService _playerMovementService;
 
         public PlayerInitService(IStatsProvider statsProvider, HealthParameter healthParameter,
             IPlayerLocator playerLocator, Player player, ISaveEntryRepository saveEntryRepository,
-            StatsUpgradeService statsUpgradeService, SignalBus signalBus,
+            StatsUpgradeService statsUpgradeService, IMessageBroker messageBroker,
             IGameStatsService gameStatsService, IPlayerMovementService playerMovementService)
         {
             _statsProvider = statsProvider;
@@ -26,7 +27,7 @@ namespace JustMoby_TestWork
             _player = player;
             _saveEntryRepository = saveEntryRepository;
             _statsUpgradeService = statsUpgradeService;
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
             _gameStatsService = gameStatsService;
             _playerMovementService = playerMovementService;
         }
@@ -63,7 +64,7 @@ namespace JustMoby_TestWork
 
             _statsUpgradeService.AddAvailableUpgrade(playerData.AvailableUpgradeCount, false);
             _statsUpgradeService.CancelUpgrade();
-            _signalBus.Fire(new ChangeMaxHealthSignal());
+            _messageBroker.Publish(new ChangeMaxHealthMessage());
 
             _healthParameter.SetDirectly(playerData.Health);
         }

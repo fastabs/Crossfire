@@ -1,4 +1,4 @@
-namespace JustMoby_TestWork
+﻿namespace Crossfire.Workspace
 {
     public abstract class Stat
     {
@@ -30,3 +30,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

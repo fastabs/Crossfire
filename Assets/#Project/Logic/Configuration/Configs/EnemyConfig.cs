@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     [Serializable]
     public struct EnemyConfig
@@ -16,3 +16,4 @@ namespace JustMoby_TestWork
         public BaseStatsConfig BaseStats;
     }
 }
+

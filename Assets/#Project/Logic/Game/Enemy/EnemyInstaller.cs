@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class EnemyInstaller : MonoInstaller
     {
@@ -9,6 +9,8 @@ namespace JustMoby_TestWork
 
         public override void InstallBindings()
         {
+            enemy ??= GetComponent<Enemy>();
+
             Container.BindInstance(enemy).AsSingle();
             Container.QueueForInject(enemy);
 

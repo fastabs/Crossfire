@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface IGameStatsService
     {
@@ -27,3 +27,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

@@ -1,6 +1,6 @@
-using Zenject;
+﻿using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public static class PlayerInstaller
     {
@@ -16,3 +16,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

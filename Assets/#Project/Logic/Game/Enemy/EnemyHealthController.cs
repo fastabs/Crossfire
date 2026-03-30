@@ -1,28 +1,30 @@
-using System;
+﻿using System;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class EnemyHealthController : IHealthService, IInitializable, IDisposable
     {
         private static readonly int DeathTrigger = Animator.StringToHash("Death");
         private static readonly int TakeDamageTrigger = Animator.StringToHash("TakeDamage");
-        private const float DESTROY_DELAY = 2f;
+        private const float DestroyDelay = 2f;
 
+        private readonly CompositeDisposable _subscriptions = new();
         private readonly IConfigRepository _config;
         private readonly IGameStatsService _gameStatsService;
         private readonly StatsUpgradeService _statsUpgradeService;
         private readonly Enemy _enemy;
         private readonly HealthParameter _healthParameter;
-        private readonly SignalBus _signalBus;
+        private readonly IMessageBroker _messageBroker;
 
-        public EnemyHealthController(Enemy enemy, HealthParameter healthParameter, SignalBus signalBus,
+        public EnemyHealthController(Enemy enemy, HealthParameter healthParameter, IMessageBroker messageBroker,
             IConfigRepository config, IGameStatsService gameStatsService, StatsUpgradeService statsUpgradeService)
         {
             _enemy = enemy;
             _healthParameter = healthParameter;
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
             _config = config;
             _gameStatsService = gameStatsService;
             _statsUpgradeService = statsUpgradeService;
@@ -32,22 +34,26 @@ namespace JustMoby_TestWork
 
         public void Initialize()
         {
-            _signalBus.Subscribe<TakeDamageSignal>(OnTakeDamage);
-            _signalBus.Subscribe<DeathSignal>(OnDead);
+            _messageBroker.Receive<TakeDamageMessage>()
+                .Subscribe(OnTakeDamage)
+                .AddTo(_subscriptions);
+
+            _messageBroker.Receive<DeathMessage>()
+                .Subscribe(OnDead)
+                .AddTo(_subscriptions);
         }
 
         public void Dispose()
         {
-            _signalBus.Unsubscribe<TakeDamageSignal>(OnTakeDamage);
-            _signalBus.Unsubscribe<DeathSignal>(OnDead);
+            _subscriptions.Dispose();
         }
 
-        private void OnTakeDamage(TakeDamageSignal signal)
+        private void OnTakeDamage(TakeDamageMessage message)
         {
-            if (signal.Health != _healthParameter)
+            if (message.Health != _healthParameter)
                 return;
 
-            _signalBus.Fire(new HitEnemySignal());
+            _messageBroker.Publish(new HitEnemyMessage());
 
             if (!IsDead)
             {
@@ -60,13 +66,13 @@ namespace JustMoby_TestWork
             {
                 var deathVelocityForce = _config.Enemy.DeathVelocityForce;
                 var force = -_enemy.transform.forward * deathVelocityForce;
-                _enemy.Rigidbody.AddForceAtPosition(force, signal.HitPoint, ForceMode.Impulse);
+                _enemy.Rigidbody.AddForceAtPosition(force, message.HitPoint, ForceMode.Impulse);
             }
         }
 
-        private void OnDead(DeathSignal signal)
+        private void OnDead(DeathMessage message)
         {
-            if (signal.Health != _healthParameter || IsDead)
+            if (message.Health != _healthParameter || IsDead)
                 return;
 
             IsDead = true;
@@ -80,7 +86,7 @@ namespace JustMoby_TestWork
                 _enemy.Rigidbody.velocity = Vector3.down;
             }
 
-            UnityEngine.Object.Destroy(_enemy.gameObject, DESTROY_DELAY);
+            UnityEngine.Object.Destroy(_enemy.gameObject, DestroyDelay);
 
             _statsUpgradeService.AddAvailableUpgrade();
             _gameStatsService.AddEnemyKill();

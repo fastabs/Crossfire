@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface IEnemyTargetDetector
     {
@@ -35,15 +35,23 @@ namespace JustMoby_TestWork
             }
 
             var player = _playerLocator.Player.transform;
-            var transform = _enemy.transform;
+            var enemyTransform = _enemy.transform;
+            var direction = player.position - enemyTransform.position;
+            var distance = direction.magnitude;
 
-            if (!Physics.Raycast(transform.position, player.position - transform.position, out var hit))
+            if (distance <= Mathf.Epsilon)
+            {
+                Target = player;
+                return;
+            }
+
+            if (!Physics.Raycast(enemyTransform.position, direction.normalized, out var hit, distance))
             {
                 Target = null;
                 return;
             }
 
-            Target = hit.transform == player ? hit.transform : null;
+            Target = hit.transform == player || hit.transform.IsChildOf(player) ? player : null;
         }
     }
 }

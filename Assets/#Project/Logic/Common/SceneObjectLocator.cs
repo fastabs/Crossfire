@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     internal static class SceneObjectLocator
     {

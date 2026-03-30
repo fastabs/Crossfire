@@ -1,10 +1,11 @@
-using Lean.Transition;
+﻿using Lean.Transition;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class PlayerHealthBarUI : MonoBehaviour
     {
@@ -19,45 +20,46 @@ namespace JustMoby_TestWork
 
         private IPlayerStatsProvider _playerStatsProvider;
         private HealthParameter _playerHealthParameter;
-
-        private SignalBus _signalBus;
+        private IMessageBroker _messageBroker;
 
         [Inject]
         private void Construct(IPlayerStatsProvider playerStatsProvider, HealthParameter playerHealthParameter,
-            SignalBus signalBus)
+            IMessageBroker messageBroker)
         {
             _playerStatsProvider = playerStatsProvider;
             _playerHealthParameter = playerHealthParameter;
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
         }
 
         private void Awake()
         {
-            _signalBus.Subscribe<TakeDamageSignal>(OnTakeDamage);
-            _signalBus.Subscribe<TakeHealSignal>(OnTakeHeal);
-            _signalBus.Subscribe<ChangeMaxHealthSignal>(OnChangeMaxHealth);
+            _messageBroker.Receive<TakeDamageMessage>()
+                .Subscribe(OnTakeDamage)
+                .AddTo(this);
+
+            _messageBroker.Receive<TakeHealMessage>()
+                .Subscribe(OnTakeHeal)
+                .AddTo(this);
+
+            _messageBroker.Receive<ChangeMaxHealthMessage>()
+                .Subscribe(_ => OnChangeMaxHealth())
+                .AddTo(this);
+
             UpdateHealth();
         }
 
-        private void OnDestroy()
+        private void OnTakeDamage(TakeDamageMessage message)
         {
-            _signalBus.Unsubscribe<TakeDamageSignal>(OnTakeDamage);
-            _signalBus.Unsubscribe<TakeHealSignal>(OnTakeHeal);
-            _signalBus.Unsubscribe<ChangeMaxHealthSignal>(OnChangeMaxHealth);
-        }
-
-        private void OnTakeDamage(TakeDamageSignal signal)
-        {
-            if (signal.Health != _playerHealthParameter)
+            if (message.Health != _playerHealthParameter)
                 return;
 
             OnDamageTransition?.Begin();
             UpdateHealth();
         }
 
-        private void OnTakeHeal(TakeHealSignal signal)
+        private void OnTakeHeal(TakeHealMessage message)
         {
-            if (signal.Health != _playerHealthParameter)
+            if (message.Health != _playerHealthParameter)
                 return;
 
             OnHealTransition?.Begin();

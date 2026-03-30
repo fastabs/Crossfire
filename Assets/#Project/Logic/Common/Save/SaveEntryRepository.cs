@@ -1,7 +1,7 @@
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface ISaveEntryRepository
     {

@@ -1,8 +1,9 @@
-using System;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class MainMenuService : IInitializable, IDisposable
     {
@@ -20,40 +21,50 @@ namespace JustMoby_TestWork
 
         public void Initialize()
         {
-            _mainMenuUI.NewGameButton.OnClick.AddListener(OnStart);
+            _mainMenuUI.NewGameButton.OnClick.AddListener(OnStartClicked);
             _mainMenuUI.ExitButton.OnClick.AddListener(OnExit);
 
             if (_mainMenuUI.LoadGameButton != null)
             {
                 _mainMenuUI.LoadGameButton.interactable = _saveEntryRepository.IsSaveFileExists;
-                _mainMenuUI.LoadGameButton.OnClick.AddListener(OnLoad);
+                _mainMenuUI.LoadGameButton.OnClick.AddListener(OnLoadClicked);
             }
         }
 
         public void Dispose()
         {
-            _mainMenuUI.NewGameButton.OnClick.RemoveListener(OnStart);
+            _mainMenuUI.NewGameButton.OnClick.RemoveListener(OnStartClicked);
             _mainMenuUI.ExitButton.OnClick.RemoveListener(OnExit);
 
             if (_mainMenuUI.LoadGameButton != null)
-                _mainMenuUI.LoadGameButton.OnClick.RemoveListener(OnLoad);
+                _mainMenuUI.LoadGameButton.OnClick.RemoveListener(OnLoadClicked);
         }
 
-        private void OnStart()
+        private void OnStartClicked()
+        {
+            StartNewGameAsync().Forget();
+        }
+
+        private void OnLoadClicked()
+        {
+            LoadGameAsync().Forget();
+        }
+
+        private async UniTaskVoid StartNewGameAsync()
         {
             _saveEntryRepository.DeleteSave();
             _mainMenuUI.NewGameButton.interactable = false;
-            _sceneService.LoadGame();
+            await _sceneService.LoadGameAsync();
         }
 
-        private void OnLoad()
+        private async UniTaskVoid LoadGameAsync()
         {
             if (!_saveEntryRepository.IsSaveFileExists)
                 return;
 
             _saveEntryRepository.LoadSave();
             _mainMenuUI.LoadGameButton.interactable = false;
-            _sceneService.LoadGame();
+            await _sceneService.LoadGameAsync();
         }
 
         private void OnExit()

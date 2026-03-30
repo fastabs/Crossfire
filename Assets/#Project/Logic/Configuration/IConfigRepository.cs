@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public interface IConfigRepository
     {

@@ -1,4 +1,4 @@
-namespace JustMoby_TestWork
+﻿namespace Crossfire.Workspace
 {
     public interface IParameter<T>
         where T : struct
@@ -6,3 +6,4 @@ namespace JustMoby_TestWork
         T Value { get; }
     }
 }
+

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class EnemyMovementController : IInitializable, IFixedTickable
     {
@@ -84,3 +84,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

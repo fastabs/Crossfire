@@ -1,33 +1,26 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using UniRx;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
-    public sealed class StatsUpgradeService : IInitializable
+    public sealed class StatsUpgradeService : IInitializable, IDisposable
     {
         public int AvailableUpgradeCount { get; private set; }
+        public int CurrentAvailableUpgradeCount => _currentAvailableUpgradeCount.Value;
+        public IReadOnlyReactiveProperty<int> CurrentAvailableUpgradeCountObservable => _currentAvailableUpgradeCount;
 
-        private int _currentAvailableUpgradeCount;
-        public int CurrentAvailableUpgradeCount
-        {
-            get => _currentAvailableUpgradeCount;
-            private set
-            {
-                _currentAvailableUpgradeCount = value;
-                _signalBus.Fire(new StatsUpgradesCountSignal(value));
-            }
-        }
-
+        private readonly IntReactiveProperty _currentAvailableUpgradeCount = new();
         private readonly IPlayerStatsProvider _playerStatsProvider;
-        private readonly SignalBus _signalBus;
+        private readonly IMessageBroker _messageBroker;
 
         private List<StatUpgrade> _statUpgrades;
 
-        public StatsUpgradeService(IPlayerStatsProvider playerStatsProvider, SignalBus signalBus)
+        public StatsUpgradeService(IPlayerStatsProvider playerStatsProvider, IMessageBroker messageBroker)
         {
             _playerStatsProvider = playerStatsProvider;
-            _signalBus = signalBus;
+            _messageBroker = messageBroker;
         }
 
         public void Initialize()
@@ -36,17 +29,21 @@ namespace JustMoby_TestWork
             CreateUpgrade(_playerStatsProvider.MaxHealth);
             CreateUpgrade(_playerStatsProvider.MoveSpeed);
             CreateUpgrade(_playerStatsProvider.Damage);
-            _signalBus.Fire(new StatsUpgradesCountSignal(CurrentAvailableUpgradeCount));
+        }
+
+        public void Dispose()
+        {
+            _currentAvailableUpgradeCount.Dispose();
         }
 
         public void AddAvailableUpgrade(int count = 1, bool notifyFirstUpgrade = true)
         {
             var wasWithoutUpgrades = AvailableUpgradeCount <= 0;
             AvailableUpgradeCount += count;
-            CurrentAvailableUpgradeCount += count;
+            SetCurrentAvailableUpgradeCount(CurrentAvailableUpgradeCount + count);
 
             if (notifyFirstUpgrade && count > 0 && wasWithoutUpgrades && AvailableUpgradeCount > 0)
-                _signalBus.Fire(new FirstUpgradePointReceivedSignal());
+                _messageBroker.Publish(new FirstUpgradePointReceivedMessage());
         }
 
         public bool TryChangeStat(Stat stat, int delta)
@@ -62,8 +59,8 @@ namespace JustMoby_TestWork
                 return false;
 
             _statUpgrades[statUpgradeIndex].NewUpgradeLevel = upgradeLevel;
-            CurrentAvailableUpgradeCount -= delta;
-            _signalBus.Fire(new StatUpgradeValueSignal(stat, statUpgrade.NewUpgradeLevel));
+            SetCurrentAvailableUpgradeCount(CurrentAvailableUpgradeCount - delta);
+            _messageBroker.Publish(new StatUpgradeValueMessage(stat, statUpgrade.NewUpgradeLevel));
 
             return true;
         }
@@ -77,18 +74,18 @@ namespace JustMoby_TestWork
                 stat.SetUpgradeLevel(statUpgrade.NewUpgradeLevel);
 
                 if (stat is MaxHealthStat && currentUpgradeLevel != statUpgrade.NewUpgradeLevel)
-                    _signalBus.Fire(new ChangeMaxHealthSignal());
+                    _messageBroker.Publish(new ChangeMaxHealthMessage());
             }
 
             AvailableUpgradeCount = CurrentAvailableUpgradeCount;
             Reset();
-            _signalBus.Fire(new UpgradeAppliedSignal());
+            _messageBroker.Publish(new UpgradeAppliedMessage());
         }
 
         public void CancelUpgrade()
         {
             Reset();
-            _signalBus.Fire(new UpgradeCanceledSignal());
+            _messageBroker.Publish(new UpgradeCanceledMessage());
         }
 
         private void CreateUpgrade(Stat stat)
@@ -99,7 +96,7 @@ namespace JustMoby_TestWork
                 NewUpgradeLevel = stat.CurrentUpgradeLevel
             });
 
-            _signalBus.Fire(new StatUpgradeCreatedSignal(stat));
+            _messageBroker.Publish(new StatUpgradeCreatedMessage(stat));
         }
 
         private void Reset()
@@ -108,10 +105,15 @@ namespace JustMoby_TestWork
             {
                 var level = statUpgrade.Stat.CurrentUpgradeLevel;
                 statUpgrade.NewUpgradeLevel = level;
-                _signalBus.Fire(new StatUpgradeValueSignal(statUpgrade.Stat, level));
+                _messageBroker.Publish(new StatUpgradeValueMessage(statUpgrade.Stat, level));
             }
 
-            CurrentAvailableUpgradeCount = AvailableUpgradeCount;
+            SetCurrentAvailableUpgradeCount(AvailableUpgradeCount);
+        }
+
+        private void SetCurrentAvailableUpgradeCount(int value)
+        {
+            _currentAvailableUpgradeCount.Value = value;
         }
 
         private int GetStatUpgradeIndex(Stat stat)

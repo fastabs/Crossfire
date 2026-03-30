@@ -1,7 +1,7 @@
-using Lean.Gui;
+﻿using Lean.Gui;
 using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class MainMenuUI : MonoBehaviour
     {

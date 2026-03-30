@@ -1,4 +1,4 @@
-namespace JustMoby_TestWork
+﻿namespace Crossfire.Workspace
 {
     public sealed class DamageStat : Stat
     {
@@ -8,3 +8,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

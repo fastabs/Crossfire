@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class EnemySpawnController : ITickable
     {
@@ -49,6 +49,7 @@ namespace JustMoby_TestWork
 
         public Enemy[] GetAllEnemies()
         {
+            _enemies.RemoveAll(enemy => enemy == null);
             return _enemies.ToArray();
         }
 

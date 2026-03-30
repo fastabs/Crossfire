@@ -1,4 +1,4 @@
-namespace JustMoby_TestWork
+﻿namespace Crossfire.Workspace
 {
     public interface IStatsProvider
     {
@@ -7,3 +7,4 @@ namespace JustMoby_TestWork
         DamageStat Damage { get; }
     }
 }
+

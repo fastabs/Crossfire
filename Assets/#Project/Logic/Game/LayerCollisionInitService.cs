@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class LayerCollisionInitService : IInitializable
     {
@@ -38,3 +38,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

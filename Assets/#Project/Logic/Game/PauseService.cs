@@ -1,36 +1,35 @@
-using Zenject;
+﻿using UniRx;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class PauseService
     {
-        public bool IsPaused { get; private set; }
+        private readonly BoolReactiveProperty _state = new(false);
 
-        private readonly SignalBus _signalBus;
-
-        public PauseService(SignalBus signalBus)
-        {
-            _signalBus = signalBus;
-        }
+        public bool IsPaused => _state.Value;
+        public IReadOnlyReactiveProperty<bool> State => _state;
 
         public void Pause()
         {
-            IsPaused = true;
-            _signalBus.Fire(new PauseToggledSignal());
+            SetState(true);
         }
 
         public void Unpause()
         {
-            IsPaused = false;
-            _signalBus.Fire(new PauseToggledSignal());
+            SetState(false);
         }
 
         public void Toggle()
         {
-            if (IsPaused)
-                Unpause();
-            else
-                Pause();
+            SetState(!IsPaused);
+        }
+
+        private void SetState(bool isPaused)
+        {
+            if (_state.Value == isPaused)
+                return;
+
+            _state.Value = isPaused;
         }
     }
 }

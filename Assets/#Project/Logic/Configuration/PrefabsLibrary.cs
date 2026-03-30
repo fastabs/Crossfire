@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using UnityEngine;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     [CreateAssetMenu(menuName = "Configs/PrefabsLibrary", fileName = nameof(PrefabsLibrary))]
     public sealed class PrefabsLibrary : ScriptableObject

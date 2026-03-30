@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     public sealed class PlayerInputController : IInitializable, ITickable, IFixedTickable, IDisposable
     {
@@ -81,3 +81,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

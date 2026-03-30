@@ -1,4 +1,4 @@
-namespace JustMoby_TestWork
+﻿namespace Crossfire.Workspace
 {
     public interface IPlayerLocator
     {
@@ -21,3 +21,4 @@ namespace JustMoby_TestWork
         }
     }
 }
+

@@ -1,6 +1,6 @@
-using System.Text;
+﻿using System.Text;
 
-namespace JustMoby_TestWork
+namespace Crossfire.Workspace
 {
     internal static class StatTitleFormatter
     {

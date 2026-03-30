@@ -1,4 +1,4 @@
-namespace JustMoby_TestWork
+﻿namespace Crossfire.Workspace
 {
     public sealed class EnemyStatsProvider : IStatsProvider
     {
