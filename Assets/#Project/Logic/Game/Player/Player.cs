@@ -7,6 +7,7 @@ namespace Crossfire.Workspace
     {
         [field: SerializeField] public Rigidbody Rigidbody { get; private set; }
         [field: SerializeField] public Transform Head { get; private set; }
+        [field: SerializeField] public GameObject Weapon { get; private set; }
         [field: SerializeField] public Transform GunShootPoint { get; private set; }
 
         private HealthParameter _healthParameter;

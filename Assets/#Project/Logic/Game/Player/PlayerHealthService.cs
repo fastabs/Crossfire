@@ -11,16 +11,18 @@ namespace Crossfire.Workspace
         private readonly ICursorService _cursorService;
         private readonly HealthParameter _playerHealth;
         private readonly IMessageBroker _messageBroker;
+        private readonly Player _player;
 
         public bool IsDead { get; private set; }
 
         public PlayerHealthService(IMessageBroker messageBroker, IPlayerLocator playerLocator,
-            ICursorService cursorService, HealthParameter playerHealth)
+            ICursorService cursorService, HealthParameter playerHealth, Player player)
         {
             _messageBroker = messageBroker;
             _playerLocator = playerLocator;
             _cursorService = cursorService;
             _playerHealth = playerHealth;
+            _player = player;
         }
 
         public void Initialize()
@@ -37,12 +39,20 @@ namespace Crossfire.Workspace
 
         private void OnDead(DeathMessage message)
         {
-            if (message.Health != _playerHealth)
+            if (message.Health != _playerHealth || IsDead)
                 return;
 
             IsDead = true;
             _playerLocator.SetupPlayer(null);
             _cursorService.Show();
+
+            if (_player.Rigidbody != null)
+            {
+                _player.Rigidbody.velocity = UnityEngine.Vector3.zero;
+                _player.Rigidbody.angularVelocity = UnityEngine.Vector3.zero;
+            }
+
+            _player.Weapon.SetActive(false);
         }
     }
 }

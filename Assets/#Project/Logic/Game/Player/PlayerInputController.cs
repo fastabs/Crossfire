@@ -12,16 +12,18 @@ namespace Crossfire.Workspace
         private readonly IPlayerMovementService _playerMovementService;
         private readonly IPlayerShootingService _playerShootingService;
         private readonly PauseService _pauseService;
+        private readonly PlayerHealthService _playerHealthService;
 
         public PlayerInputController(InputActions inputActions, ICursorService cursorService,
             IPlayerMovementService playerMovementService, IPlayerShootingService playerShootingService,
-            PauseService pauseService)
+            PauseService pauseService, PlayerHealthService playerHealthService)
         {
             _inputActions = inputActions;
             _playerMovementService = playerMovementService;
             _playerShootingService = playerShootingService;
             _pauseService = pauseService;
             _cursorService = cursorService;
+            _playerHealthService = playerHealthService;
         }
 
         public void Initialize()
@@ -41,7 +43,7 @@ namespace Crossfire.Workspace
 
         public void Tick()
         {
-            if (_pauseService.IsPaused)
+            if (_pauseService.IsPaused || _playerHealthService.IsDead)
                 return;
 
             if (_cursorService.CursorMode != CursorMode.Hidden)
@@ -53,7 +55,7 @@ namespace Crossfire.Workspace
 
         public void FixedTick()
         {
-            if (_pauseService.IsPaused)
+            if (_pauseService.IsPaused || _playerHealthService.IsDead)
                 return;
 
             var move = _inputActions.Player.Move.ReadValue<Vector2>();
@@ -68,6 +70,9 @@ namespace Crossfire.Workspace
 
         private void OnFire(InputAction.CallbackContext context)
         {
+            if (_playerHealthService.IsDead)
+                return;
+
             if (_cursorService.CursorMode != CursorMode.Hidden)
                 return;
 
@@ -76,9 +81,11 @@ namespace Crossfire.Workspace
 
         private void OnCursorModeToggle(InputAction.CallbackContext context)
         {
+            if (_playerHealthService.IsDead)
+                return;
+
             _cursorService.Toggle();
             _pauseService.Toggle();
         }
     }
 }
-

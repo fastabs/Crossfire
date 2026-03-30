@@ -14,13 +14,14 @@ namespace Crossfire.Workspace
         private readonly PrefabsLibrary _prefabs;
         private readonly PauseService _pauseService;
         private readonly DiContainer _container;
+        private readonly PlayerHealthService _playerHealthService;
 
         private readonly List<Enemy> _enemies;
         private float _timer;
         private bool _isFirstSpawnDone;
 
         public EnemySpawnController(IConfigRepository config, PrefabsLibrary prefabs,
-            PauseService pauseService, DiContainer container)
+            PauseService pauseService, DiContainer container, PlayerHealthService playerHealthService)
         {
             _enemies = new List<Enemy>();
 
@@ -28,11 +29,12 @@ namespace Crossfire.Workspace
             _prefabs = prefabs;
             _pauseService = pauseService;
             _container = container;
+            _playerHealthService = playerHealthService;
         }
 
         public void Tick()
         {
-            if (_pauseService.IsPaused)
+            if (_pauseService.IsPaused || _playerHealthService.IsDead)
                 return;
 
             var spawnInterval = _isFirstSpawnDone
@@ -100,3 +102,4 @@ namespace Crossfire.Workspace
         }
     }
 }
+
