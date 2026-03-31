@@ -7,9 +7,9 @@ namespace Crossfire.Workspace
 {
     public sealed class EnemyHealthController : IHealthService, IInitializable, IDisposable
     {
+        private const float DestroyDelay = 2f;
         private static readonly int DeathTrigger = Animator.StringToHash("Death");
         private static readonly int TakeDamageTrigger = Animator.StringToHash("TakeDamage");
-        private const float DestroyDelay = 2f;
 
         private readonly CompositeDisposable _subscriptions = new();
         private readonly IConfigRepository _config;
@@ -57,8 +57,7 @@ namespace Crossfire.Workspace
 
             if (!IsDead)
             {
-                if (_enemy.Animator != null)
-                    _enemy.Animator.SetTrigger(TakeDamageTrigger);
+                _enemy.Animator.SetTrigger(TakeDamageTrigger);
                 return;
             }
 
@@ -76,8 +75,7 @@ namespace Crossfire.Workspace
                 return;
 
             IsDead = true;
-            if (_enemy.Animator != null)
-                _enemy.Animator.SetTrigger(DeathTrigger);
+            _enemy.Animator.SetTrigger(DeathTrigger);
 
             if (_enemy.Rigidbody != null)
             {

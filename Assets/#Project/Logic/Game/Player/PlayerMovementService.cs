@@ -13,6 +13,7 @@ namespace Crossfire.Workspace
     public sealed class PlayerMovementService : IPlayerMovementService
     {
         private static readonly int MoveSpeedParameter = Animator.StringToHash("MoveSpeed");
+
         private readonly IConfigRepository _configRepository;
         private readonly IPlayerStatsProvider _statsProvider;
         private readonly Player _player;
@@ -34,6 +35,7 @@ namespace Crossfire.Workspace
             var moveSpeed = _statsProvider.MoveSpeed.Value;
 
             var sqrMagnitude = direction.sqrMagnitude;
+            _player.Animator.SetFloat(MoveSpeedParameter, sqrMagnitude * moveSpeed);
 
             if (sqrMagnitude < 0.01f)
                 return;
