@@ -8,6 +8,7 @@ namespace Crossfire.Workspace
     public sealed class Crosshair : MonoBehaviour
     {
         [field: SerializeField] public LeanPlayer HitTransition { get; private set; }
+        [field: SerializeField] public AudioSource AudioSource { get; private set; }
 
         private IMessageBroker _messageBroker;
 
@@ -24,9 +25,10 @@ namespace Crossfire.Workspace
                 .AddTo(this);
         }
 
-        public void ShowHit()
+        private void ShowHit()
         {
             HitTransition?.Begin();
+            AudioSource.Play();
         }
     }
 }

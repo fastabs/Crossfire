@@ -84,6 +84,7 @@ namespace Crossfire.Workspace
                 _enemy.Rigidbody.velocity = Vector3.down;
             }
 
+            _enemy.AudioSource.Play();
             UnityEngine.Object.Destroy(_enemy.gameObject, DestroyDelay);
 
             _statsUpgradeService.AddAvailableUpgrade();

@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 namespace Crossfire.Workspace
@@ -11,11 +10,10 @@ namespace Crossfire.Workspace
         public override void InstallBindings()
         {
             mainMenuUI ??= SceneObjectLocator.FindInScene<MainMenuUI>(gameObject.scene);
-            if (mainMenuUI == null)
-                throw new InvalidOperationException($"{nameof(MainMenuInstaller)} requires a {nameof(MainMenuUI)} in the MainMenu scene.");
 
             Container.BindInstance(mainMenuUI);
             Container.QueueForInject(mainMenuUI);
+            Container.BindInterfacesAndSelfTo<MainMenuInitService>().AsSingle();
             Container.BindInterfacesAndSelfTo<MainMenuService>().AsSingle();
         }
     }

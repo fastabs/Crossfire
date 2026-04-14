@@ -8,6 +8,7 @@ namespace Crossfire.Workspace
         [field: SerializeField] public Rigidbody Rigidbody { get; private set; }
         [field: SerializeField] public Transform ShootPoint { get; private set; }
         [field: SerializeField] public Animator Animator { get; private set; }
+        [field: SerializeField] public AudioSource AudioSource { get; private set; }
 
         public HealthParameter HealthParameter { get; private set; }
         public IStatsProvider StatsProvider { get; private set; }

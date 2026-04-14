@@ -5,13 +5,16 @@ namespace Crossfire.Workspace
 {
     public sealed class GameInitService : IInitializable
     {
+        private readonly AudioService _audioService;
         private readonly ICursorService _cursorService;
         private readonly ISaveEntryRepository _saveEntryRepository;
         private readonly EnemySpawnController _enemySpawnController;
 
-        public GameInitService(ICursorService cursorService, ISaveEntryRepository saveEntryRepository,
+        public GameInitService(AudioService audioService, ICursorService cursorService,
+            ISaveEntryRepository saveEntryRepository,
             [InjectOptional] EnemySpawnController enemySpawnController = null)
         {
+            _audioService = audioService;
             _cursorService = cursorService;
             _saveEntryRepository = saveEntryRepository;
             _enemySpawnController = enemySpawnController;
@@ -22,6 +25,7 @@ namespace Crossfire.Workspace
             Application.targetFrameRate = 60;
             ApplySaveEntryForEnemies();
             _cursorService.Hide();
+            _audioService.SetMainThemeVolume(0.4f);
         }
 
         private void ApplySaveEntryForEnemies()
